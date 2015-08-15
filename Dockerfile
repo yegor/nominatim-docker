@@ -53,17 +53,17 @@ RUN ./configure
 RUN make
 
 # Configure postgresql
-RUN service postgresql start && \
+RUN service postgresql start && sleep 20 && \
   pg_dropcluster --stop 9.3 main
-RUN service postgresql start && \
+RUN service postgresql start && sleep 20 && \
   pg_createcluster --start -e UTF-8 9.3 main
 
-RUN service postgresql start && \
+RUN service postgresql start && sleep 20 && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='nominatim'" | grep -q 1 || sudo -u postgres createuser -s nominatim && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data && \
   sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
-RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe-latest.osm.pbf
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/north-america-latest.osm.pbf
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/north-america/us/delaware-latest.osm.pbf
@@ -76,7 +76,7 @@ ADD local.php /app/nominatim/settings/local.php
 RUN ./utils/setup.php --help
 
 
-RUN service postgresql start && \
+RUN service postgresql start && sleep 20 && \
   sudo -u nominatim ./utils/setup.php --osm-file /app/data.pbf --all --threads 2
 
 
@@ -113,5 +113,4 @@ WORKDIR /app/nominatim
 RUN chmod +x ./configPostgresql.sh
 ADD start.sh /app/nominatim/start.sh
 RUN chmod +x /app/nominatim/start.sh
-#CMD /app/nominatim/start.sh
-CMD /bin/bash
+CMD /app/nominatim/start.sh
